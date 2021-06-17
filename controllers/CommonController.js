@@ -134,7 +134,7 @@ CommonController.Check_for_Admin = (values) => {
                     AdminID: values.AdminID
                 };
             }
-            query.Admin_Type = 1
+            // query.Admin_Type = 1
 
             let Result = await Admins.findOne(query).select('-_id -__v').lean();
             if (Result === null) {

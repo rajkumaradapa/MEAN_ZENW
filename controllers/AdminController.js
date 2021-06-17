@@ -19,8 +19,185 @@ const ResponseController = require("./ResponseController");
 //models
 const Admins = require("../models/Admins");
 const Store = require("../models/Store");
+const Products = require("../models/Products");
 
 
+
+// AdminController.Active_Store = (values) => {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             let query = {
+//                 StoreID: values.StoreID
+//             }
+//             let changes = {
+//                 $set: {
+//                     Status: true,
+//                     updated_at: new Date()
+//                 }
+//             };
+//             let UpdatedStatus = await Store.updateOne(query, changes).lean();
+//             resolve({ success: true, extras: { Status: CommonMessages.ACTIVATED_SUCCESSFULLY } })
+//         } catch (error) {
+//             reject(await ResponseController.Common_Error_Handler(error));
+//         }
+//     });
+// }
+
+// AdminController.Inactive_Store = (values) => {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             let query = {
+//                 StoreID: values.StoreID
+//             }
+//             let changes = {
+//                 $set: {
+//                     Status: false,
+//                     updated_at: new Date()
+//                 }
+//             };
+//             let UpdatedStatus = await Store.updateOne(query, changes).lean();
+//             resolve({ success: true, extras: { Status: CommonMessages.INACTIVATED_SUCCESSFULLY } })
+//         } catch (error) {
+//             reject(await ResponseController.Common_Error_Handler(error));
+//         }
+//     });
+// }
+
+
+// AdminController.List_All_Store = (values) => {
+//     return new Promise((resolve, reject) => {
+//         setImmediate(async () => {
+//             try {
+//                 let query = {
+
+//                 };
+//                 if (values.Whether_Status_Filter) {
+//                     query.Status = values.Status
+//                 }
+
+
+//                 let sortOptions = {
+//                     created_at: -1
+//                 };
+//                 let toSkip = parseInt(values.skip);
+//                 let toLimit = parseInt(values.limit);
+//                 let Count = await Store.countDocuments(query).lean().exec();
+//                 let Result = await Store.find(query).select('-_id -__v -updated_at -Point -Geometry -Delivery_Pricings').sort(sortOptions).skip(toSkip).limit(toLimit).lean().exec();             
+//                 resolve({ success: true, extras: { Count: Count, Data: Result } })
+
+//             } catch (error) {
+//                 reject(await ResponseController.Common_Error_Handler(error));
+//             }
+//         });
+//     });
+// }
+
+
+// AdminController.Update_Store = (values, Selected_AdminData) => {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+
+//             let Latitude = parseFloat(values.Latitude) || 0;
+//             let Longitude = parseFloat(values.Longitude) || 0;
+//             let Point = [
+//                 Longitude,
+//                 Latitude
+//             ];
+
+//             let query = {
+//                 StoreID: values.StoreID
+//             }
+//             let Data = {
+//                 AdminID: Selected_AdminData.AdminID,
+//                 Name: values.Name,
+//                 PhoneNumber: values.PhoneNumber,
+//                 EmailID: values.EmailID,
+//                 Latitude: parseFloat(Latitude),
+//                 Longitude: parseFloat(Longitude),
+//                 Point: [parseFloat(Longitude), parseFloat(Latitude)],
+//                 location: {
+//                     type: "Point",
+//                     coordinates: [
+//                         parseFloat(Longitude),
+//                         parseFloat(Latitude)
+//                     ]
+//                 },
+//                 updated_at: new Date()
+//             }
+//             let changes = {
+//                 $set: Data
+//             }
+//             let UpdatedStatus = await Store.updateOne(query, changes).lean();
+//             resolve({ success: true, extras: { Status: CommonMessages.UPDATED_SUCCESSFULLY } })
+
+//         } catch (error) {
+//             reject(await ResponseController.Common_Error_Handler(error));
+//         }
+//     });
+// }
+
+AdminController.Add_Product = (values, AdminData) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let Latitude = parseFloat(values.Latitude) || 0;
+            let Longitude = parseFloat(values.Longitude) || 0;
+            let Point = [
+                Longitude,
+                Latitude
+            ];
+
+            let Data = {
+                Product_ID: uuid.v4(),
+                StoreID: values.StoreID,
+                Name: values.Name,
+                Category: values.Category,
+                Description: values.Description,
+                Available_Qty: values.Available_Qty,
+                created_at: new Date(),
+                updated_at: new Date()
+            }
+            let SaveResult = await Products(Data).save();
+            resolve({ success: true, extras: { Status: CommonMessages.CREATED_SUCCESSFULLY } });
+
+        } catch (error) {
+            reject(await ResponseController.Common_Error_Handler(error));
+        }
+    });
+}
+
+AdminController.Sub_User_Login = (values, AdminData) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let Password = String(values.Password);
+            let PasswordSalt = AdminData.PasswordSalt;
+            let pass = Password + PasswordSalt;
+            let PasswordHash = crypto.createHash('sha512').update(pass).digest("hex");
+            if (AdminData.PasswordHash === PasswordHash) {
+                let fndupdquery = {
+                    AdminID: AdminData.AdminID
+                };
+                let fndupdchanges = {
+                    $set: {
+                        SessionID: uuid.v4(),
+                        updated_at: new Date()
+                    }
+                };
+                let fndupdoptions = {
+                    upsert: true,
+                    setDefaultsOnInsert: true,
+                    new: true
+                };
+                AdminData = await Admins.findOneAndUpdate(fndupdquery, fndupdchanges, fndupdoptions).select('-_id -__v -PasswordHash -PasswordSalt  -updated_at').lean();
+                resolve({ success: true, extras: { Status: CommonMessages.LOGIN_SUCCESSFULLY, AdminData: AdminData } })
+            } else {
+                throw { success: false, extras: { code: 2, msg: ApiMessages.INVALID_PASSWORD } }
+            }
+        } catch (error) {
+            reject(await ResponseController.Common_Error_Handler(error));
+        }
+    });
+}
 
 AdminController.Active_Store = (values) => {
     return new Promise(async (resolve, reject) => {
@@ -73,7 +250,7 @@ AdminController.List_All_Store = (values) => {
                 if (values.Whether_Status_Filter) {
                     query.Status = values.Status
                 }
-              
+
 
                 let sortOptions = {
                     created_at: -1
@@ -81,7 +258,7 @@ AdminController.List_All_Store = (values) => {
                 let toSkip = parseInt(values.skip);
                 let toLimit = parseInt(values.limit);
                 let Count = await Store.countDocuments(query).lean().exec();
-                let Result = await Store.find(query).select('-_id -__v -updated_at -Point -Geometry -Delivery_Pricings').sort(sortOptions).skip(toSkip).limit(toLimit).lean().exec();             
+                let Result = await Store.find(query).select('-_id -__v -updated_at -Point -Geometry -Delivery_Pricings').sort(sortOptions).skip(toSkip).limit(toLimit).lean().exec();
                 resolve({ success: true, extras: { Count: Count, Data: Result } })
 
             } catch (error) {

@@ -8,6 +8,161 @@ const isBoolean = require("node-boolify").isBoolean;
 const ResponseController = require("../controllers/ResponseController");
 
 
+// AdminMediator.List_SIngle_Store = async (req, res) => {
+//     try {
+//         let values = JSON.parse(JSON.stringify(req.body));
+//         if (
+//             req.body.AdminID != null && req.body.SessionID != null
+//             && values.StoreID != null && values.StoreID != ''
+//         ) {
+//             let AdminData = await CommonController.Check_for_Admin(req.body);
+//             let Store_Data = await CommonController.Check_for_Store(req.body);
+//             let Result = { success: true, extras: { Status: Store_Data } }
+//             await ResponseController.Common_Response_Handler(res, Result);
+//         } else {
+//             throw { success: false, extras: { msg: ApiMessages.ENTER_ALL_TAGS } };
+//         }
+//     } catch (error) {
+//         await ResponseController.Common_Response_Handler(res, error);
+//     }
+// }
+
+// AdminMediator.Active_Store = async (req, res) => {
+//     try {
+//         let values = JSON.parse(JSON.stringify(req.body));
+//         if (
+//             req.body.AdminID != null && req.body.SessionID != null
+//             && values.StoreID != null && values.StoreID != ''
+//         ) {
+//             let AdminData = await CommonController.Check_for_Admin(req.body);
+//             let Store_Data = await CommonController.Check_for_Store(req.body);
+//             let Result = await AdminController.Active_Store(req.body);
+//             await ResponseController.Common_Response_Handler(res, Result);
+//         } else {
+//             throw { success: false, extras: { msg: ApiMessages.ENTER_ALL_TAGS } };
+//         }
+//     } catch (error) {
+//         await ResponseController.Common_Response_Handler(res, error);
+//     }
+// }
+
+// AdminMediator.Inactive_Store = async (req, res) => {
+//     try {
+//         let values = JSON.parse(JSON.stringify(req.body));
+//         if (
+//             req.body.AdminID != null && req.body.SessionID != null
+//             && values.StoreID != null && values.StoreID != ''
+//         ) {
+//             let AdminData = await CommonController.Check_for_Admin(req.body);
+//             let Store_Data = await CommonController.Check_for_Store(req.body);
+//             let Result = await AdminController.Inactive_Store(req.body);
+//             await ResponseController.Common_Response_Handler(res, Result);
+//         } else {
+//             throw { success: false, extras: { msg: ApiMessages.ENTER_ALL_TAGS } };
+//         }
+//     } catch (error) {
+//         await ResponseController.Common_Response_Handler(res, error);
+//     }
+// }
+
+// AdminMediator.List_All_Store = async (req, res) => {
+//     try {
+//         if (
+//             req.body.AdminID != null && req.body.SessionID != null
+//             & req.body.skip != null && isFinite(req.body.skip)
+//             && req.body.limit != null && isFinite(req.body.limit)
+//             && req.body.Whether_Status_Filter != null && isBoolean(req.body.Whether_Status_Filter)
+//         ) {
+//             let AdminData = await CommonController.Check_for_Admin(req.body);
+//             let Result = await AdminController.List_All_Store(req.body);
+//             await ResponseController.Common_Response_Handler(res, Result);
+//         } else {
+//             throw { success: false, extras: { msg: ApiMessages.ENTER_ALL_TAGS } };
+//         }
+//     } catch (error) {
+//         await ResponseController.Common_Response_Handler(res, error);
+//     }
+// }
+
+// AdminMediator.Update_Store = async (req, res) => {
+//     try {
+//         let values = JSON.parse(JSON.stringify(req.body));
+//         if (
+//             values.AdminID != null && values.SessionID != null
+//             && values.StoreID != null && values.StoreID != ''
+//             && values.Name != null && values.Name != ''
+//             && values.EmailID != null && values.EmailID != ''
+//             && values.PhoneNumber != null && values.PhoneNumber != ''
+//             && req.body.Latitude != null && req.body.Longitude != null
+//             && values.Selected_AdminID != null && values.Selected_AdminID != ''
+
+//         ) {
+//             let AdminData = await CommonController.Check_for_Admin(values);
+//             let Selected_AdminData = await CommonController.Check_Only_Admin({ AdminID: values.Selected_AdminID });
+//             if (Selected_AdminData.Admin_Type === 2) {
+//                 let Store_Data = await CommonController.Check_for_Store(req.body);
+//                 let Result = await AdminController.Update_Store(values, Selected_AdminData);
+//                 await ResponseController.Common_Response_Handler(res, Result);
+//             } else {
+//                 throw { success: false, extras: { code: 2, msg: ApiMessages.SELCTED_ADMIN_NOT_A_SUB_USER } };
+
+//             }
+
+//         } else {
+//             throw { success: false, extras: { code: 2, msg: ApiMessages.ENTER_ALL_TAGS } };
+//         }
+//     } catch (error) {
+//         await ResponseController.Common_Response_Handler(res, error);
+//     }
+// }
+
+AdminMediator.Add_Product = async (req, res) => {
+    try {
+        let values = JSON.parse(JSON.stringify(req.body));
+        if (
+            values.AdminID != null && values.SessionID != null
+            && values.StoreID != null && values.StoreID != ''
+            && values.Name != null && values.Name != ''
+            && values.Category != null && values.Category != ''
+            && values.Description != null && values.Description != ''
+            && req.body.Available_Qty != null
+        ) {
+            let AdminData = await CommonController.Check_for_Admin(values);
+
+            if (AdminData.Admin_Type === 2) {
+                let Store_Data = await CommonController.Check_for_Store(req.body);
+                let Result = await AdminController.Add_Product(values, AdminData);
+                await ResponseController.Common_Response_Handler(res, Result);
+            } else {
+                throw { success: false, extras: { code: 2, msg: ApiMessages.SELCTED_ADMIN_NOT_A_SUB_USER } };
+
+            }
+        } else {
+            throw { success: false, extras: { code: 2, msg: ApiMessages.ENTER_ALL_TAGS } };
+        }
+    } catch (error) {
+        await ResponseController.Common_Response_Handler(res, error);
+    }
+}
+
+AdminMediator.Sub_User_Login = async (req, res) => {
+    try {
+        let values = JSON.parse(JSON.stringify(req.body));
+        if (
+            values.EmailID != null && values.EmailID != ''
+            && values.Password != null && values.Password != ''
+        ) {
+            let ValidityStatus = CommonController.Common_Email_Validation(values.EmailID);
+            let AdminData = await AdminController.Check_Whether_Sub_User_Email_Registered(values);
+            let Result = await AdminController.Sub_User_Login(values, AdminData);
+            await ResponseController.Common_Response_Handler(res, Result);
+        } else {
+            throw { success: false, extras: { code: 2, msg: ApiMessages.ENTER_ALL_TAGS } };
+        }
+    } catch (error) {
+        await ResponseController.Common_Response_Handler(res, error);
+    }
+}
 
 AdminMediator.List_SIngle_Store = async (req, res) => {
     try {

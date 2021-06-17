@@ -23,7 +23,6 @@ router.route('/Inactivate_Admin').post(AdminMediator.Inactivate_Admin);
 
 router.route('/Activate_Admin').post(AdminMediator.Activate_Admin);
 
-//
 //Stores
 router.route('/Add_Store').post(AdminMediator.Add_Store);
 
@@ -36,5 +35,23 @@ router.route('/Inactive_Store').post(AdminMediator.Inactive_Store);
 router.route('/Active_Store').post(AdminMediator.Active_Store);
 
 router.route('/List_SIngle_Store').post(AdminMediator.List_SIngle_Store);
+//
+//Products
+router.route('/Sub_User_Login').post(AdminMediator.Sub_User_Login);
+
+//Stores
+router.route('/Add_Product').post(AdminMediator.Add_Product);
+
+// router.route('/Update_Store').post(AdminMediator.Update_Store);
+
+// router.route('/List_All_Store').post(AdminMediator.List_All_Store);
+
+// router.route('/Inactive_Store').post(AdminMediator.Inactive_Store);
+
+// router.route('/Active_Store').post(AdminMediator.Active_Store);
+
+// router.route('/List_SIngle_Store').post(AdminMediator.List_SIngle_Store);
+
+
 
 module.exports = router;
